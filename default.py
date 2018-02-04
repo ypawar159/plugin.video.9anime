@@ -4,8 +4,18 @@ from resources.lib.ui.SourcesList import SourcesList
 from resources.lib.ui.router import route, router_process
 from resources.lib.NineAnimeBrowser import NineAnimeBrowser
 import urlparse
+import xmlrpclib
+import xbmcaddon
+import os
+
+__addon__ = xbmcaddon.Addon()
 
 AB_LIST = [".", "0"] + [chr(i) for i in range(ord("A"), ord("Z")+1)]
+
+aria_url = "http://{}:{}/rpc".format(__addon__.getSetting('ipaddress'), __addon__.getSetting('port'))
+aria_path = __addon__.getSetting('downloadpath')
+aria_server = xmlrpclib.ServerProxy(aria_url, verbose=False)
+
 MENU_ITEMS = [
     (control.lang(30000), "latest"),
     (control.lang(30001), "newest"),
@@ -103,7 +113,7 @@ def POPDUBBED_PAGES(payload):
 
 @route('search')
 def SEARCH(payload):
-    query = control.keyboard(control.lang(30007))
+    query = control.keyboard(control.lang(30002))
     if query:
         return control.draw_items(_BROWSER.search_site(query))
     return False
@@ -125,9 +135,10 @@ def GENRE_ANIMES(payload):
 
 @route('play/*')
 def PLAY(payload):
+    #control.xbmc.log(msg=str(payload.split(".")[0]),level=control.xbmc.LOGERROR)    
     anime_url, episode = payload.rsplit("/", 1)
     sources = _BROWSER.get_episode_sources(anime_url, int(episode))
-
+    anime_name = payload.split(".")[0] + " episode " + episode + " "
     serverChoice = filter(lambda x:
         control.getSetting(x[0]) == 'true', SERVER_CHOICES.iteritems())
     serverChoice = map(lambda x: x[1], serverChoice)
@@ -146,7 +157,7 @@ def PLAY(payload):
         if s._read_sources():
             items = sorted(s._sources.iteritems(), key=lambda x: x[0])
             items = [(title[5:], url) for title, url in items]
-            items = map(lambda x: utils.allocate_item(x[0], 'playlink&url=/'+x[1], False, ''), items)
+            items = map(lambda x: utils.allocate_item(anime_name + x[0], 'playlink&url=/'+x[1], False, ''), items)
             return control.draw_items(items)
     else:
         return control.play_source(s.get_video_link())
@@ -155,6 +166,25 @@ def PLAY(payload):
 def PLAY_SOURCE(payload):
     return control.play_source(urlparse.unquote(payload))
 
+@route('download*')
+def DOWNLOAD(payload):
+    url,name = payload.split("&name=")
+    #control.xbmc.log(msg=" ".join([url,name]),level=control.xbmc.LOGERROR)
+    paused = __addon__.getSetting('paused')
+    secret = __addon__.getSetting('rpcsecret')
+    tkn = 'token:{}'.format(secret)
+    #control.xbmc.log(msg=tkn,level=control.xbmc.LOGERROR)
+    try:
+        gid = aria_server.aria2.addUri(tkn, [url], {'pause': paused, 'dir': os.path.join(aria_path, 'test'), 'out':name})
+        if gid:
+            control.xbmcgui.Dialog().notification("9Anime","Download Added")
+        return gid
+    except:
+        control.xbmcgui.Dialog().notification("9Anime","Download Failed")
+        return
+    #return control.xbmcgui.Dialog().notification("9Anime", str(payload)) 
+    
+    
 @route('')
 def LIST_MENU(payload):
     return control.draw_items([utils.allocate_item(name, url, True) for name, url in MENU_ITEMS])

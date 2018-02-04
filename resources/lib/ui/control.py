@@ -55,7 +55,10 @@ def xbmc_add_player_item(name, url, iconimage=''):
     liz.setProperty("fanart_image", __settings__.getAddonInfo('path') + "/fanart.jpg")
     liz.setProperty("Video", "true")
     liz.setProperty("IsPlayable", "true")
-    liz.addContextMenuItems([], replaceItems=False)
+    #cmd = 'XBMC.Notification({},{})'.format("9anime",url.replace("playlink&url=/",""))
+    #xbmcgui.Dialog().notification("9anime","download&url={}".format(url.replace("playlink&url=/",""))) 
+    cmd = 'XBMC.RunPlugin({})'.format(addon_url(url.replace("playlink","download")+"&name={}".format(name.replace(" ","_"))))
+    liz.addContextMenuItems([("Download", cmd)], replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=HANDLE,url=u,listitem=liz, isFolder=False)
     return ok
 
