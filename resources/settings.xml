@@ -3,6 +3,7 @@
 	<category label="General">
 		<setting id="reverseorder" type="labelenum" label="Episode order" values="Ascending|Descending" default="Descending"/>
 		<setting id="displaystyle" type="labelenum" label="Display episodes as" values="Directory|List" default="List"/>
+		<setting label="tld" type="text" id="tld" default="http://9anime.is" />
 	</category>
 	<category label="Servers">
 		<setting id="serverg4" type="bool" label="Use G4" default="true"/>
