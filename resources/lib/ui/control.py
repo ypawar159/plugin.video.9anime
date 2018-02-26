@@ -104,3 +104,23 @@ def draw_items(video_data):
             xbmc_add_player_item(vid['name'], vid['url'], vid['image'])
     xbmcplugin.endOfDirectory(HANDLE, succeeded=True, updateListing=False, cacheToDisc=True)
     return True
+
+def log(msg,level="INFO"):
+    log_message = '{0}: {1}'.format(ADDON_NAME, msg)
+    if level == "DEBUG":
+        xbmc.log(msg=log_message, level=xbmc.LOGDEBUG)
+    if level == "INFO":
+        xbmc.log(msg=log_message, level=xbmc.LOGINFO)
+    if level == "NOTICE":
+        xbmc.log(msg=log_message, level=xbmc.LOGNOTICE)
+    if level == "WARNING":
+        xbmc.log(msg=log_message, level=xbmc.LOGWARNING)
+    if level == "ERROR":
+        xbmc.log(msg=log_message, level=xbmc.LOGERROR)
+    if level == "SEVERE":
+        xbmc.log(msg=log_message, level=xbmc.LOGSEVERE)
+    if level == "FATAL":
+        xbmc.log(msg=log_message, level=xbmc.LOGFATAL)
+        
+    
+    
