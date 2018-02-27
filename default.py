@@ -182,7 +182,7 @@ def PLAY_SOURCE(payload):
     url = ""
     for p in par[1:]:
         if p.startswith("name"):
-            name = p.split("=")[1]
+            name = p.split("=")[1] + ".mp4"
         if p.startswith("url"):
             url = p.split("=")[1]
         if p.startswith("download"):
