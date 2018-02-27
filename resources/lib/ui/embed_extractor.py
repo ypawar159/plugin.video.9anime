@@ -97,7 +97,7 @@ def __final_resolve_rapidvideo(url, label, referer=None):
         reqObj = http.send_request(playUrl)
         return VIDEO_RE.findall(reqObj.text)[0]
 
-    return playSource
+    return playSource()
 
 def __extract_rapidvideo(url, page_content, referer=None):
     SOURCES_RE = re.compile("\<a\shref=\".+q=(.+?)\"\>")

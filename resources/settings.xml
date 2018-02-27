@@ -16,7 +16,6 @@
         <setting label="IP Address" type="ipaddress" id="ipaddress" default="127.0.0.1"/>
         <setting label="Port" type="number" id="port" default="6800"/>
         <setting label="Pause on Add" type="bool" id="paused"  default="true"/>
-        <!--<setting label="Download Path" type="folder" id="downloadpath" source="auto" option="writeable"/>-->
         <setting label="RPC Token" type="text" id="rpcsecret" option="hidden" default="asdfghjkl"/>
 	</category>
 </settings>

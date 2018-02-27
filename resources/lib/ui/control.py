@@ -65,7 +65,10 @@ def xbmc_add_player_item(name, url, iconimage=''):
     liz.setProperty("fanart_image", __settings__.getAddonInfo('path') + "/fanart.jpg")
     liz.setProperty("Video", "true")
     liz.setProperty("IsPlayable", "true")
-    liz.addContextMenuItems([], replaceItems=False)
+    #liz.addContextMenuItems([], replaceItems=False)
+    cmd = 'XBMC.RunPlugin({})'.format(
+        addon_url(url + "&name={}".format(name.replace(" ", "_")) + "&download=1"))
+    liz.addContextMenuItems([("Download", cmd)], replaceItems=False)
     ok = xbmcplugin.addDirectoryItem(handle=HANDLE, url=u, listitem=liz, isFolder=False)
     return ok
 
@@ -138,14 +141,14 @@ def log(msg, level="INFO"):
         xbmc.log(msg=log_message, level=xbmc.LOGFATAL)
 
 
-def aria2_download(url, fname, dir):
+def aria2_download(url, fname, path):
     aria_url = "http://{}:{}/rpc".format(getSetting('ipaddress'), getSetting('port'))
     aria_server = xmlrpclib.ServerProxy(aria_url, verbose=False)
     paused = getSetting("paused")
     tkn = 'token:{}'.format(getSetting('rpcsecret'))
     try:
         gid = aria_server.aria2.addUri(tkn, [url],
-                                       {'pause': paused, 'dir': dir, 'out': fname})
+                                       {'pause': paused, 'dir': path, 'out': fname})
         if gid:
             xbmcgui.Dialog().notification(ADDON_NAME, "Download Added")
         return gid
