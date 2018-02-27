@@ -147,7 +147,7 @@ def aria2_download(url, fname, path):
     tkn = 'token:{}'.format(getSetting('rpcsecret'))
     try:
         gid = aria_server.aria2.addUri(tkn, [url],
-                                       {'pause': paused, 'dir': path, 'out': fname})
+                                       {'pause': paused, 'out': fname})
         if gid:
             xbmcgui.Dialog().notification(ADDON_NAME, "Download Added")
         return gid
