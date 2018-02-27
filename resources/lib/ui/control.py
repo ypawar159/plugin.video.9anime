@@ -65,7 +65,6 @@ def xbmc_add_player_item(name, url, iconimage=''):
     liz.setProperty("fanart_image", __settings__.getAddonInfo('path') + "/fanart.jpg")
     liz.setProperty("Video", "true")
     liz.setProperty("IsPlayable", "true")
-    #liz.addContextMenuItems([], replaceItems=False)
     cmd = 'XBMC.RunPlugin({})'.format(
         addon_url(url + "&name={}".format(name.replace(" ", "_")) + "&download=1"))
     liz.addContextMenuItems([("Download", cmd)], replaceItems=False)
