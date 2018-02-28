@@ -1,4 +1,4 @@
-import xbmcgui
+from xbmcswift2 import xbmcgui
 
 class DialogProgressWrapper(object):
     def __init__(self, title, progress_string):
