@@ -1,10 +1,14 @@
-from resources.lib.ui import control
-from resources.lib.ui import utils
-from resources.lib.ui.SourcesList import SourcesList
-from resources.lib.ui.router import route, router_process
-from resources.lib.NineAnimeBrowser import NineAnimeBrowser
-import urlparse
+# from resources.lib.ui import control
+# from resources.lib.ui import utils
+# from resources.lib.ui.SourcesList import SourcesList
+# from resources.lib.ui.router import route, router_process
+# from resources.lib.NineAnimeBrowser import NineAnimeBrowser
+# import urlparse
 
+from xbmcswift2 import Plugin
+
+plugin = Plugin()
+'''
 AB_LIST = [".", "0"] + [chr(i) for i in range(ord("A"), ord("Z") + 1)]
 MENU_ITEMS = [
     (control.lang(30000), "latest"),
@@ -199,4 +203,17 @@ def LIST_MENU(payload):
     return control.draw_items([utils.allocate_item(name, url, True) for name, url in MENU_ITEMS])
 
 
-router_process(control.get_plugin_url())
+# router_process(control.get_plugin_url())
+'''
+
+@plugin.route('/')
+def index():
+    item = {
+        'label': 'Hello XBMC!',
+        'path': 'http://s3.amazonaws.com/KA-youtube-converted/JwO_25S_eWE.mp4/JwO_25S_eWE.mp4',
+        'is_playable': True
+    }
+    return [item]
+
+if __name__ == '__main__':
+    plugin.run()

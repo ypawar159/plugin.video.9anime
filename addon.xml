@@ -1,17 +1,18 @@
 <addon id="plugin.video.9anime" name="9Anime" provider-name="DxCx" version="0.0.29">
-  <requires>
-    <import addon="xbmc.python" version="2.25.0" />
-    <import addon="script.module.requests" version="2.12.4" />
-    <import addon="script.common.plugin.cache" version="2.5.5" />
-    <import addon="script.module.urlresolver" version="3.0.31" />
-  </requires>
-  <extension library="default.py" point="xbmc.python.pluginsource">
+    <requires>
+        <import addon="xbmc.python" version="2.25.0"/>
+        <import addon="script.module.requests" version="2.12.4"/>
+        <import addon="script.common.plugin.cache" version="2.5.5"/>
+        <import addon="script.module.urlresolver" version="3.0.31"/>
+        <import addon="script.module.xbmcswift2" version="2.4.0"/>
+    </requires>
+    <extension library="default.py" point="xbmc.python.pluginsource">
         <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">9Anime video plugin</summary>
-    <description lang="en">9anime is a great HD source for almost all animes out there</description>
-    <source>https://github.com/DxCx/plugin.video.9anime</source>
-    <platform>all</platform>
-  </extension>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">9Anime video plugin</summary>
+        <description lang="en">9anime is a great HD source for almost all animes out there</description>
+        <source>https://github.com/DxCx/plugin.video.9anime</source>
+        <platform>all</platform>
+    </extension>
 </addon>
