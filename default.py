@@ -7,6 +7,13 @@ from resources.lib.NineAnimeBrowser import NineAnimeBrowser
 
 from xbmcswift2 import Plugin
 
+try:
+    import xbmc
+
+    running_cli = False
+except ImportError:
+    running_cli = True
+
 plugin = Plugin()
 SERVER_CHOICES = {
     "serverg4": "Server G4",
@@ -20,7 +27,7 @@ _BROWSER = NineAnimeBrowser()
 
 # Todo: Prevent crash if no data retruned from browser functions
 def url_for(url):
-    return "plugin://{}/{}".format(plugin.name, url)
+    return "plugin://{}/{}".format(plugin.id, url)
 
 
 def isDirectoryStyle():
@@ -237,40 +244,40 @@ def LIST_MENU(payload):
 # router_process(control.get_plugin_url())
 '''
 MENU_ITEMS = [
-    ("Latest", "latest"),
-    ("Newest", "newest"),
-    ("Recent Subbed", "recent_subbed"),
-    ("Popular Subbed", "popular_subbed"),
-    ("Recent Dubbed", "recent_dubbed"),
-    ("Popular Dubbed", "popular_dubbed"),
+    ("Latest", "latest_d"),
+    ("Newest", "newest_d"),
+    ("Recent Subbed", "recent_subbed_d"),
+    ("Popular Subbed", "popular_subbed_d"),
+    ("Recent Dubbed", "recent_dubbed_d"),
+    ("Popular Dubbed", "popular_dubbed_d"),
     ("Genres", "genres"),
-    ("Search", "search"),
+    ("Search", "search_d"),
     ("Settings", "settings")
 ]
 
 
-# @plugin.route("/latest", name="default", options={"page": "0"})
-@plugin.route("/latest")
-def latest():
-    try:
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/latest", name="latest_d", options={"page": "1"})
+@plugin.route("/latest/<page>")
+def latest(page):
+    # try:
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
     plugin.log.info(page)
     animes = _BROWSER.get_latest(int(page))
     plugin.log.info(animes[0])
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("latest"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("latest", page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("latest"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("latest", page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
@@ -284,11 +291,12 @@ def animes(anime):
     plugin.log.info(episodes[-1])
     items = []
     for episode in episodes:
-        anime, episode_number = episode["url"].split("/")[1:]
+        # anime, episode_number = episode["url"].split("/")[1:]
         items.append(
             {
                 "label": episode["name"],
-                "path": plugin.url_for("play", anime=anime, episode_number=episode_number)
+                # "path": plugin.url_for("play", anime=anime, episode_number=episode_number)
+                "path": url_for(episode["url"])
             }
         )
     return plugin.finish(items)
@@ -322,139 +330,144 @@ def play(anime, episode_number):
     #         #items = map(lambda x: utils.allocate_item(anime_name + x[0], 'playlink/&url=' + x[1], False, ''), items)
     #         return control.draw_items(items)
     # else:
+    if running_cli:
+        return plugin.finish([])
     link = s.get_video_link()
     plugin.log.info("Playlink: " + link)
     item = {"label": anime, "path": link}
     return plugin.play_video(item)
-    # return plugin.finish([])
-    pass
 
 
-@plugin.route("/newest")
-def newest():
-    try:
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/newest", name="newest_d", options={"page": "1"})
+@plugin.route("/newest/<page>")
+def newest(page):
+    # try:
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
     plugin.log.info(page)
     animes = _BROWSER.get_newest(int(page))
     plugin.log.info(animes[0])
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("newest"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("newest", page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("newest"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("newest", page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
 
 
-@plugin.route("/recent_subbed")
-def recent_subbed():
-    try:
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/recent_subbed", name="recent_subbed_d", options={"page": "1"})
+@plugin.route("/recent_subbed/<page>")
+def recent_subbed(page):
+    # try:
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
     plugin.log.info(page)
     animes = _BROWSER.get_recent_subbed(int(page))
     plugin.log.info(animes[0])
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("recent_subbed"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("recent_subbed", page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("recent_subbed"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("recent_subbed", page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
 
 
-@plugin.route("/popular_subbed")
-def popular_subbed():
-    try:
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/popular_subbed", name="popular_subbed_d", options={"page": "1"})
+@plugin.route("/popular_subbed/<page>")
+def popular_subbed(page):
+    # try:
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
     plugin.log.info(page)
     animes = _BROWSER.get_popular_subbed(int(page))
     plugin.log.info(animes[0])
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("popular_subbed"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("popular_subbed", page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("popular_subbed"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("popular_subbed", page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
 
 
-@plugin.route("/recent_dubbed")
-def recent_dubbed():
-    try:
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/recent_dubbed", name="recent_dubbed_d", options={"page": "1"})
+@plugin.route("/recent_dubbed/<page>")
+def recent_dubbed(page):
+    # try:
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
     plugin.log.info(page)
     animes = _BROWSER.get_recent_dubbed(int(page))
     plugin.log.info(animes[0])
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("recent_dubbed"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("recent_dubbed", page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("recent_dubbed"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("recent_dubbed", page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
 
 
-@plugin.route("/popular_dubbed")
-def popular_dubbed():
-    try:
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/popular_dubbed", name="popular_dubbed_d", options={"page": "1"})
+@plugin.route("/popular_dubbed/<page>")
+def popular_dubbed(page):
+    # try:
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
     plugin.log.info(page)
     animes = _BROWSER.get_popular_dubbed(int(page))
     plugin.log.info(animes[0])
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("popular_dubbed"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("popular_dubbed", page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("popular_dubbed"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("popular_dubbed", page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
@@ -470,7 +483,7 @@ def genres():
         items.append(
             {
                 "label": genre["name"],
-                "path": plugin.url_for("genre", name=name, page=page)
+                "path": url_for(genre["url"])
             }
         )
     return plugin.finish(items)
@@ -484,27 +497,29 @@ def genre(name, page):
     plugin.log.info(animes[-1])
     items = []
     for anime in animes:
-        u = anime["url"]
-        if not u.startswith("genre"):
-            path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
-        else:
-            path = plugin.url_for("genre", name=name, page=anime["url"].split("/")[-1])
+        # u = anime["url"]
+        # if not u.startswith("genre"):
+        #     path = plugin.url_for("animes", anime=anime["url"].split("/")[-1])
+        # else:
+        #     path = plugin.url_for("genre", name=name, page=anime["url"].split("/")[-1])
         items.append(
             {
                 "label": anime["name"],
-                "path": path
+                "path": url_for(anime["url"])
             }
         )
     return plugin.finish(items)
 
 
-@plugin.route("/search")
-def search():
-    try:
-        query = plugin.request.args["query"][0]
-        page = plugin.request.args["page"][0]
-    except KeyError:
-        page = 1
+@plugin.route("/search", name="search_d", options={"query": "", "page": "1"})
+@plugin.route("/search/<query>/<page>")
+def search(query, page):
+    # try:
+    #     query = plugin.request.args["query"][0]
+    #     page = plugin.request.args["page"][0]
+    # except KeyError:
+    #     page = 1
+    if query == "":
         query = plugin.keyboard(heading="Search Anime")
     plugin.log.info(page)
     if query:
@@ -523,7 +538,7 @@ def search():
             items.append(
                 {
                     "label": anime["name"],
-                    "path": path
+                    "path": url_for(anime["url"])
                 }
             )
         return plugin.finish(items)
@@ -531,8 +546,9 @@ def search():
 
 @plugin.route("/settings")
 def settings():
-    plugin.open_settings()
-    pass
+    if running_cli:
+        return plugin.finish([])
+    return plugin.open_settings()
 
 
 @plugin.route('/')
