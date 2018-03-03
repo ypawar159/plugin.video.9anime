@@ -2,6 +2,10 @@ from resources.lib.ui import utils
 from resources.lib.ui.SourcesList import SourcesList
 from resources.lib.NineAnimeBrowser import NineAnimeBrowser
 from xbmcswift2 import Plugin
+import pickle
+from urllib import urlencode
+
+# from kodiswift import Plugin
 
 try:
     import xbmc
@@ -23,7 +27,22 @@ _BROWSER = NineAnimeBrowser()
 
 # Todo: Prevent crash if no data returned from browser functions
 def url_for(url):
+    # if url.startswith(starting):
+    #     # return "plugin://{}/{}/{}".format(plugin.id, url, quote(data))
+    #     return "plugin://{}/{}?{}".format(plugin.id, url, urlencode(data))
+    # else:
     return "plugin://{}/{}".format(plugin.id, url)
+    # plugin.url_for(url.split("/")[0],)
+
+
+def create_url(url, data=None):
+    url_parts = url.split("/")
+    if url.startswith("animes"):
+        return plugin.url_for("animes", anime=url_parts[-1], anime_name=data.encode("utf8"))
+    if url.startswith("play"):
+        return plugin.url_for("play", anime=url_parts[-2], episode_number=url_parts[-1], anime_name=data.encode("utf-8"))
+    else:
+        return url_for(url)
 
 
 def isDirectoryStyle():
@@ -62,7 +81,7 @@ def latest(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -71,6 +90,8 @@ def latest(page):
 @plugin.route("/animes/<anime>")
 def animes(anime):
     plugin.log.info(anime)
+    anime_name = plugin.request.args["anime_name"][0]
+    plugin.log.info(anime_name)
     episodes = _BROWSER.get_anime_episodes(anime, isDirectoryStyle())
     plugin.log.info(episodes[0])
     plugin.log.info(episodes[-1])
@@ -79,15 +100,16 @@ def animes(anime):
         items.append(
             {
                 "label": episode["name"],
-                "path": url_for(episode["url"])
+                "path": create_url(episode["url"],anime_name)
             }
         )
     return plugin.finish(items)
-    pass
 
 
 @plugin.route("/play/<anime>/<episode_number>")
 def play(anime, episode_number):
+    anime_name = plugin.request.args["anime_name"][0]
+    plugin.log.info("Name: " + anime_name)
     plugin.log.info("Anime: {} Episode: {}".format(anime, episode_number))
     sources = _BROWSER.get_episode_sources(anime, int(episode_number))
     serverChoice = filter(lambda x: plugin.get_setting(x[0]) == 'true', SERVER_CHOICES.iteritems())
@@ -137,7 +159,7 @@ def newest(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -155,7 +177,7 @@ def recent_subbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -173,7 +195,7 @@ def popular_subbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -191,7 +213,7 @@ def recent_dubbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -209,7 +231,7 @@ def popular_dubbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -240,7 +262,7 @@ def genre(name, page):
         items.append(
             {
                 "label": anime["name"],
-                "path": url_for(anime["url"])
+                "path": create_url(anime["url"],anime["name"])
             }
         )
     return plugin.finish(items)
@@ -261,7 +283,7 @@ def search(query, page):
             items.append(
                 {
                     "label": anime["name"],
-                    "path": url_for(anime["url"])
+                    "path": create_url(anime["url"],anime["name"])
                 }
             )
         return plugin.finish(items)
