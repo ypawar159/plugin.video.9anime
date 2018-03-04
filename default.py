@@ -35,10 +35,10 @@ def url_for(url):
     # plugin.url_for(url.split("/")[0],)
 
 
-def create_url(url, data=None):
+def create_url(url, data=None, download=False):
     url_parts = url.split("/")
     if url.startswith("animes"):
-        return plugin.url_for("animes", anime=url_parts[-1], anime_name=data.encode("utf-8"))
+        return plugin.url_for("animes", anime=url_parts[-1], anime_name=data.encode("utf-8"), download=download)
     if url.startswith("play"):
         return plugin.url_for("play", anime=url_parts[-2], episode_number=url_parts[-1],
                               anime_name=data)
@@ -82,7 +82,9 @@ def latest(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"], anime["name"])
+                "path": create_url(anime["url"], anime["name"]),
+                "context_menu": [("Download", actions.background(
+                    create_url(anime["url"], anime["name"], True)))]
             }
         )
     return plugin.finish(items)
@@ -92,6 +94,9 @@ def latest(page):
 def animes(anime):
     plugin.log.info(anime)
     anime_name = plugin.request.args["anime_name"][0]
+    download = "True" == plugin.request.args["download"][0]
+    if download:
+        dm.download_anime(plugin,anime,anime_name)
     # plugin.log.info(anime_name)
     # print(anime_name)
     plugin.log.info(anime_name)
