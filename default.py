@@ -1,9 +1,9 @@
 from resources.lib.ui import utils
 from resources.lib.ui.SourcesList import SourcesList
 from resources.lib.NineAnimeBrowser import NineAnimeBrowser
-from xbmcswift2 import Plugin
-import pickle
+from xbmcswift2 import Plugin, actions
 from urllib import urlencode
+import downloadmanager as dm
 
 # from kodiswift import Plugin
 
@@ -38,9 +38,10 @@ def url_for(url):
 def create_url(url, data=None):
     url_parts = url.split("/")
     if url.startswith("animes"):
-        return plugin.url_for("animes", anime=url_parts[-1], anime_name=data.encode("utf8"))
+        return plugin.url_for("animes", anime=url_parts[-1], anime_name=data.encode("utf-8"))
     if url.startswith("play"):
-        return plugin.url_for("play", anime=url_parts[-2], episode_number=url_parts[-1], anime_name=data.encode("utf-8"))
+        return plugin.url_for("play", anime=url_parts[-2], episode_number=url_parts[-1],
+                              anime_name=data)
     else:
         return url_for(url)
 
@@ -81,7 +82,7 @@ def latest(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -91,6 +92,8 @@ def latest(page):
 def animes(anime):
     plugin.log.info(anime)
     anime_name = plugin.request.args["anime_name"][0]
+    # plugin.log.info(anime_name)
+    # print(anime_name)
     plugin.log.info(anime_name)
     episodes = _BROWSER.get_anime_episodes(anime, isDirectoryStyle())
     plugin.log.info(episodes[0])
@@ -100,7 +103,7 @@ def animes(anime):
         items.append(
             {
                 "label": episode["name"],
-                "path": create_url(episode["url"],anime_name)
+                "path": create_url(episode["url"], anime_name)
             }
         )
     return plugin.finish(items)
@@ -132,7 +135,12 @@ def play(anime, episode_number):
                 plugin.log.info(items)
                 plugin.log.info(items[0])
                 items = map(
-                    lambda x: {"label": x[0], "path": plugin.url_for("playlink", url=x[1]), "is_playable": True}, items)
+                    lambda x: {"label": x[0], "is_playable": True,
+                               "path": plugin.url_for("playlink", url=x[1], anime_name=anime_name,
+                                                      episode_number=episode_number, download=False),
+                               "context_menu": [("Download", actions.background(
+                                   plugin.url_for("playlink", url=x[1], anime_name=anime_name,
+                                                  episode_number=episode_number, download=True)))]}, items)
                 plugin.log.info(items)
                 return plugin.finish(items)
         else:
@@ -144,7 +152,14 @@ def play(anime, episode_number):
 
 @plugin.route("/playlink/<url>")
 def playlink(url):
-    return plugin.set_resolved_url(url)
+    anime_name = plugin.request.args["anime_name"][0]
+    episode_number = plugin.request.args["episode_number"][0]
+    download = "True" == plugin.request.args["download"][0]
+    fname = anime_name + " Episode " + episode_number
+    if download:
+        return dm.aria2_download(plugin, [(fname, url)])
+    item = {"label": fname, "path": url}
+    return plugin.play_video(item)
 
 
 @plugin.route("/newest", name="newest_d", options={"page": "1"})
@@ -159,7 +174,7 @@ def newest(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -177,7 +192,7 @@ def recent_subbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -195,7 +210,7 @@ def popular_subbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -213,7 +228,7 @@ def recent_dubbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -231,7 +246,7 @@ def popular_dubbed(page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -262,7 +277,7 @@ def genre(name, page):
         items.append(
             {
                 "label": anime["name"],
-                "path": create_url(anime["url"],anime["name"])
+                "path": create_url(anime["url"], anime["name"])
             }
         )
     return plugin.finish(items)
@@ -283,7 +298,7 @@ def search(query, page):
             items.append(
                 {
                     "label": anime["name"],
-                    "path": create_url(anime["url"],anime["name"])
+                    "path": create_url(anime["url"], anime["name"])
                 }
             )
         return plugin.finish(items)
