@@ -71,7 +71,9 @@ def download_anime(plugin, browser, anime, anime_name):
 
 
 def fetch_downloads(plugin, episode_list):
+    downloads=[]
     for episode in episode_list:
-        fetched = fetch_sources([('RapidVideo', episode["source"])], MockedDialog(), True)
+        fetched = fetch_sources([('RapidVideo',episode["source"])],MockedDialog(),True)
         plugin.log.info(fetched)
-        aria2_download(plugin, [(episode["name"], fetched.values()[0])])
+        downloads.append((episode["name"],fetched.values()[0]))
+    aria2_download(plugin,downloads)
