@@ -1,9 +1,49 @@
 import xmlrpclib
 from xbmcswift2 import xbmcgui
 from resources.lib.ui.utils import fetch_sources
-from resources.lib.ui.test_utils import MockedDialog
+import re
 
+parse_resolution = re.compile(r"\d+")
 dg = xbmcgui.Dialog()
+resolutions = [1080, 720, 480, 360]
+
+
+class MockedDialog(object):
+    def __init__(self):
+        pass
+
+    def update(self, precentage, name=None):
+        pass
+
+    def iscanceled(self):
+        return False
+
+
+def select_resolution(resolutions, available, preferred):
+    if len(available) == 0:
+        return
+
+    elif len(available) == 1:
+        return available[0]
+
+    elif preferred in available:
+        return preferred
+    else:
+        index = resolutions.index(preferred) + 1
+        # try lower resolutions first
+        # decided = False
+        while index < len(resolutions):
+            if resolutions[index] in available:
+                return resolutions[index]
+            index += 1
+        # try higher resolutions
+        index = resolutions.index(preferred) - 1
+        while index > -1:
+            if resolutions[index] in available:
+                return resolutions[index]
+            index -= 1
+    # If available not in resolutions return None though error would have been better
+    return
 
 
 # plugin : xbmcswift2.Plugin object
@@ -13,26 +53,30 @@ def aria2_download(plugin, files):
     aria_server = xmlrpclib.ServerProxy(aria_url, verbose=False)
     paused = plugin.get_setting("paused")
     tkn = 'token:{}'.format(plugin.get_setting('rpcsecret'))
-    for f in files:
-        try:
-            gid = aria_server.aria2.addUri(tkn, [f[1]], {'pause': paused, 'out': f[0]})
-            if gid:
-                plugin.notify("Download Added")
-        except Exception as e:
-            plugin.notify("Download Failed")
-            plugin.log.error(e)
-            plugin.log.error(files)
+    if len(files) > 0:
+        for f in files:
+            try:
+                gid = aria_server.aria2.addUri(tkn, [f[1]], {'pause': paused, 'out': f[0]})
+                if gid:
+                    plugin.notify("Download Added")
+            except Exception as e:
+                plugin.notify("Download Failed")
+                plugin.log.error(e)
+                plugin.log.error(files)
+    else:
+        plugin.notify("Nothing to Download")
+        plugin.log.error("Nothing to Download")
 
 
 def download_anime(plugin, browser, anime, anime_name):
-    pass
     plugin.log.info("Anime : " + anime)
     plugin.log.info("Anime Name : " + anime_name)
     # episodes = browser.get_anime_episodes(anime, True)
     # plugin.log.info(episodes[0])
     # episode_number = episodes[0]["url"].split("/")[-1]
-    # sources = browser.get_episode_sources(anime, int(episode_number))
-    # plugin.log.info(sources)
+    sources = browser.get_episode_sources(anime, 1)
+    plugin.log.info(len(sources))
+    plugin.log.info(sources)
     dtype = dg.select("Select Download Type", ["All", "Selected", "Range"])
     plugin.log.info(dtype)
     if dtype != -1:
@@ -71,9 +115,18 @@ def download_anime(plugin, browser, anime, anime_name):
 
 
 def fetch_downloads(plugin, episode_list):
-    downloads=[]
+    preferred_resolution = int(plugin.get_setting("prefres")[:-1])
+    downloads = []
     for episode in episode_list:
-        fetched = fetch_sources([('RapidVideo',episode["source"])],MockedDialog(),True)
+        fetched = fetch_sources([('RapidVideo', episode["source"])], MockedDialog(), True)
         plugin.log.info(fetched)
-        downloads.append((episode["name"],fetched.values()[0]))
-    aria2_download(plugin,downloads)
+        if fetched:
+            available_resolutions = {}
+            for k, v in fetched.items():
+                available_resolutions[int(parse_resolution.findall(k[5:])[0])] = v
+            plugin.log.info("Available Resolutions: " + str(sorted(available_resolutions)))
+            selected_resolution = select_resolution(resolutions, available_resolutions.keys(), preferred_resolution)
+            filename = "{} ({}p).mp4".format(episode["name"], selected_resolution)
+            plugin.log.info("Adding : " + filename)
+            downloads.append((filename, available_resolutions[selected_resolution]))
+    aria2_download(plugin, downloads)

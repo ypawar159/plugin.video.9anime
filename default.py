@@ -96,7 +96,7 @@ def animes(anime):
     anime_name = plugin.request.args["anime_name"][0]
     download = "True" == plugin.request.args["download"][0]
     if download:
-        dm.download_anime(plugin,anime,anime_name)
+        dm.download_anime(plugin, _BROWSER, anime, anime_name)
     # plugin.log.info(anime_name)
     # print(anime_name)
     plugin.log.info(anime_name)
@@ -142,10 +142,11 @@ def play(anime, episode_number):
                 items = map(
                     lambda x: {"label": x[0], "is_playable": True,
                                "path": plugin.url_for("playlink", url=x[1], anime_name=anime_name,
-                                                      episode_number=episode_number, download=False),
+                                                      episode_number=episode_number, resolution=x[0], download=False),
                                "context_menu": [("Download", actions.background(
                                    plugin.url_for("playlink", url=x[1], anime_name=anime_name,
-                                                  episode_number=episode_number, download=True)))]}, items)
+                                                  episode_number=episode_number, resolution=x[0], download=True)))]},
+                    items)
                 plugin.log.info(items)
                 return plugin.finish(items)
         else:
@@ -160,7 +161,8 @@ def playlink(url):
     anime_name = plugin.request.args["anime_name"][0]
     episode_number = plugin.request.args["episode_number"][0]
     download = "True" == plugin.request.args["download"][0]
-    fname = anime_name + " Episode " + episode_number
+    resolution = plugin.request.args["resolution"][0].split(" ")[1]
+    fname = "{} Episode {} {}.mp4".format(anime_name, episode_number, resolution)
     if download:
         return dm.aria2_download(plugin, [(fname, url)])
     item = {"label": fname, "path": url}
